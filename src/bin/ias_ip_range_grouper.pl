@@ -109,9 +109,9 @@ sub json_hash_output
 
 sub tab_hash_output
 {
-	my ($hr, $depth, $last_max_size) = @_;
+	my ($hr, $depth, $parent_net_size) = @_;
 	$depth ||= 0;
-	$last_max_size ||= 32;
+	$parent_net_size ||= 32;
 	
 	my $largest_net_size = 32;
 	foreach my $key (keys %$hr)
@@ -125,8 +125,7 @@ sub tab_hash_output
 		$largest_net_size = $net_size
 			if ($net_size <= $largest_net_size);
 	}
-	
-	# print "Largest net size: $largest_net_size\n";
+
 	foreach my $key (sort keys %$hr)
 	{
 		my $net_size;
@@ -143,16 +142,19 @@ sub tab_hash_output
 		}
 		
 		elsif ($largest_net_size <= $OPTIONS_VALUES->{'smallest-net-size'}
-			|| $OPTIONS_VALUES->{'smallest-net-size'} > $last_max_size
+			|| (
+				$parent_net_size < $OPTIONS_VALUES->{'smallest-net-size'}
+			)
 		)
 		{
+
 			print $padding,$key,$/;
-			tab_hash_output($hr->{$key}, $depth+1, $largest_net_size);
+			tab_hash_output($hr->{$key}, $depth+1, $net_size);
 		}
 
 		else
 		{
-			tab_hash_output($hr->{$key}, $depth, $largest_net_size);
+			tab_hash_output($hr->{$key}, $depth, $net_size);
 		}
 	}	
 }
