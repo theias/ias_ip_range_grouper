@@ -1,0 +1,7 @@
+#Requires: 
+AutoReqProv: no 
+Summary: Groups IPs together in subnets.
+Group: Generic Group
+License: Generic License
+Vendor: Generic Vendor
+BuildArch: noarch
