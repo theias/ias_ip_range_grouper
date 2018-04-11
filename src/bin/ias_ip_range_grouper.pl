@@ -147,6 +147,7 @@ if ($OPTIONS_VALUES->{'test'})
 if ($OPTIONS_VALUES->{'watch'})
 {
 	$SIG{'ALRM'} = \&watch_thing;
+	$SIG{'USR1'} = \&sig_usr1;
 	alarm $OPTIONS_VALUES->{'watch-every'};
 }
 
@@ -640,11 +641,22 @@ sub watch_thing
 {
 	print "\033[2J";    #clear the screen
 	print "\033[0;0H"; #jump to 0,0
-	print scalar localtime(), " pid: $$", $/;
+	print scalar localtime(), " kill -USR1 $$    to clear", $/;
 	my $condensed = condense_bit_hr($GLOBAL_IP_HASH);
 	$OUTPUT_ROUTINES{$OPTIONS_VALUES->{'output-routine'}}->(
 		convert_condensed_hr_to_decimal($condensed)
 	);
 	$SIG{'ALRM'} = \&watch_thing;
 	alarm $OPTIONS_VALUES->{'watch-every'};
+}
+
+sub sig_usr1
+{
+	$SIG{'USR1'} = \&sig_usr1;
+	clear_global_ip_hash();
+}
+
+sub clear_global_ip_hash
+{
+	%$GLOBAL_IP_HASH = ();
 }
