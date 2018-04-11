@@ -357,9 +357,9 @@ sub test_convert_back_to_human
 		process_ipv4_address(\%IP_HASH, $ipv4);
 	}
 	my $condensed = condense_bit_hr(\%IP_HASH);
-	
-	print Dumper(convert_condensed_hr_to_decimal($condensed));
-	
+	$OUTPUT_ROUTINES{$OPTIONS_VALUES->{'output-routine'}}->(
+		convert_condensed_hr_to_decimal($condensed)
+	);	
 }
 
 sub test_condense
