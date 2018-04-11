@@ -1,6 +1,15 @@
+ias-ip-range-grouper 1.1.0-0 noarch; urgency=low
+
+	* Ability to watch and clear
+	* Better sorting
+	* cidr grepping
+
+ -- Martin VanWinkle (mvanwinkle@ias.edu)  Wed, 11 Apr 2018 16:38:23 -0400
+
+
 ias-ip-range-grouper 1.0.0-0 noarch; urgency=low
 
 	* initial packaging stuff
 
- -- YOUR NAME HERE YOUR@EMAIL.HERE  Fri, 30 Mar 2018 12:08:58 -0400
+ -- Martin VanWinkle (mvanwinkle@ias.edu)  Fri, 30 Mar 2018 12:08:58 -0400
 
