@@ -74,6 +74,8 @@ my $OPTIONS = [
 	'dump-binary',
 	'output-routine=s',
 	'smallest-net-size=i',
+	'cidr-include=s@',
+	'cidr-exclude=s@',
 ];
 
 my %OUTPUT_ROUTINES = (
@@ -95,6 +97,8 @@ if (! $OUTPUT_ROUTINES{$OPTIONS_VALUES->{'output-routine'}})
 	print STDERR get_output_routines();
 	exit 1;
 }
+
+
 
 sub json_hash_output
 {
@@ -232,6 +236,8 @@ sub do_main_processing
 
 }
 
+my %STRING_CIDR_CACHE;
+
 sub process_file
 {
 	my ($fh, $ip_hash) = @_;
@@ -252,9 +258,73 @@ sub process_file
 		
 		# print "Parts:\n",
 		# print Dumper(\@parts),$/;
-		add_ips_to_hash($ip_hash, \@parts);
+
+		IPV4: foreach my $ipv4 (@parts)
+		{
+			print "IPv4! $ipv4\n";
+			my $ipv4_bits = convert_ip_to_bits($ipv4);
+
+			if (
+				$OPTIONS_VALUES->{'cidr-exclude'}
+				&&
+				scalar @{$OPTIONS_VALUES->{'cidr-exclude'}}
+			)
+			{
+				foreach my $cidr_exclude (@{$OPTIONS_VALUES->{'cidr-exclude'}})
+				{
+					print "Examining: $cidr_exclude\n";
+					add_cidr_to_cidr_cache($cidr_exclude, \%STRING_CIDR_CACHE);
+
+					next IPV4 if ( cidr_match (
+						$STRING_CIDR_CACHE{$cidr_exclude}{'ip_bits'},
+						$STRING_CIDR_CACHE{$cidr_exclude}{'netmask_bits'},
+						$ipv4_bits,
+					))
+				}
+			}
+
+			my $wanted = 1;
+
+			if (
+				$OPTIONS_VALUES->{'cidr-include'}
+				&& 
+				scalar @{$OPTIONS_VALUES->{'cidr-include'}}
+			)
+			{
+				$wanted = 0;
+				foreach my $cidr_include (@{$OPTIONS_VALUES->{'cidr-include'}})
+				{
+				add_cidr_to_cidr_cache($cidr_include, \%STRING_CIDR_CACHE);
+
+					$wanted++ if ( cidr_match (
+						$STRING_CIDR_CACHE{$cidr_include}{'ip_bits'},
+						$STRING_CIDR_CACHE{$cidr_include}{'netmask_bits'},
+						$ipv4_bits,
+					))
+				}
+			}
+			
+			add_ips_to_hash($ip_hash, \@parts)
+				if $wanted;			
+		}
 
 	}
+}
+
+sub add_cidr_to_cidr_cache
+{
+	my ($cidr, $cidr_cache) = @_;
+
+	my ($network_portion, $cidr_portion) = split('/', $cidr);
+
+	$cidr_cache->{$cidr} ||= {
+		ip_bits => convert_ip_to_bits($network_portion),
+		netmask_bits => [
+			( 1 ) x $cidr_portion,
+			( 0 ) x ( $IP_BIT_LENGTH - $cidr_portion )
+		],
+	};
+
 }
 
 sub test_bit_back_to_dec
@@ -489,4 +559,16 @@ sub verbose
 	{
 		print STDERR @rest;
 	}
+}
+
+sub cidr_match
+{
+	my ($cidr_bits_ar, $cidr_netmask_ar, $needle_ar) = @_;
+
+	for my $index (0..scalar(@$cidr_bits_ar)-1)
+	{
+		return 1 if ($cidr_netmask_ar->[$index] == 0 );
+		return 0 if ($cidr_bits_ar->[$index] != $needle_ar);
+	}
+	return 1;
 }
