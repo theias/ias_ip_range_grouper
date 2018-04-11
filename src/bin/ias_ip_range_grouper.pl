@@ -43,13 +43,19 @@ all IP addresses inside of the specified range to not be included.
 
 =item * --output-routine - Output in dumper (Data::Dumper), tabbed (pretty), or json.
 
-=item * --watch - Watch the tree grow.
+=item * --watch - Watch mode.  Watch the tree grow.
 
 =item * --watch-every - change the update frequency for the watch functionality 
 
 =back
 
-=head2 DEBUGGING
+=head1 NOTES
+
+=head2 WATCH MODE
+
+When in watch mode, do "kill -USR1 (pid)" to reset counters.
+
+=head2 DEBUGGING OPTIONS
 
 =over 4
 
@@ -95,6 +101,7 @@ my $OPTIONS = [
 	'cidr-exclude=s@',
 	'cidr-grep',
 	'watch',
+	'hit-count',
 ];
 
 my %OUTPUT_ROUTINES = (
@@ -131,6 +138,7 @@ my @TEST_IPS = (
 );
 
 my $GLOBAL_IP_HASH = {};
+my $GLOBAL_IP_HITS = {};
 my $SINGLE_TEST_IP = '172.16.1.1';
 my $IP_BIT_LENGTH = 32;
 
@@ -187,7 +195,7 @@ sub tab_hash_output
 			if ($net_size <= $largest_net_size);
 	}
 
-	foreach my $key (sort keys %$hr)
+	foreach my $key (sort sort_net_something keys %$hr)
 	{
 		my $net_size;
 		my $net;
@@ -199,7 +207,13 @@ sub tab_hash_output
 		
 		if ($net_size == 32)
 		{
-			print $padding,$key,$/;
+			print $padding,$key;
+			if ($OPTIONS_VALUES->{'hit-count'})
+			{
+				print " ", $GLOBAL_IP_HITS->{$net};
+			}
+			
+			print $/;
 		}
 		
 		elsif ($largest_net_size <= $OPTIONS_VALUES->{'smallest-net-size'}
@@ -261,9 +275,18 @@ sub do_main_processing
 		exit;
 	}
 
-	$OUTPUT_ROUTINES{$OPTIONS_VALUES->{'output-routine'}}->(
-		convert_condensed_hr_to_decimal($condensed)
-	);
+	if ($OPTIONS_VALUES->{'watch'})
+	{
+		watch_output()
+	}
+	
+	else
+	{
+
+		$OUTPUT_ROUTINES{$OPTIONS_VALUES->{'output-routine'}}->(
+			convert_condensed_hr_to_decimal($condensed)
+		);
+	}
 	# print Dumper(convert_condensed_hr_to_decimal($condensed));
 
 }
@@ -318,6 +341,8 @@ sub process_ipv4_address
 	
 	if ($wanted)
 	{
+		$GLOBAL_IP_HITS->{$ipv4}++;
+
 	
 		if ($OPTIONS_VALUES->{'cidr-grep'})
 		{
@@ -639,24 +664,47 @@ sub cidr_match
 
 sub watch_thing
 {
+	$SIG{'ALRM'} = \&watch_thing;
+	alarm $OPTIONS_VALUES->{'watch-every'};
+
+	watch_output();
+}
+
+sub watch_output
+{
 	print "\033[2J";    #clear the screen
 	print "\033[0;0H"; #jump to 0,0
-	print scalar localtime(), " kill -USR1 $$    to clear", $/;
+	print scalar localtime(), " pid: $$", $/;
 	my $condensed = condense_bit_hr($GLOBAL_IP_HASH);
 	$OUTPUT_ROUTINES{$OPTIONS_VALUES->{'output-routine'}}->(
 		convert_condensed_hr_to_decimal($condensed)
 	);
-	$SIG{'ALRM'} = \&watch_thing;
-	alarm $OPTIONS_VALUES->{'watch-every'};
+
 }
 
 sub sig_usr1
 {
 	$SIG{'USR1'} = \&sig_usr1;
-	clear_global_ip_hash();
+	clear_global_ip_counters();
 }
 
-sub clear_global_ip_hash
+sub clear_global_ip_counters
 {
 	%$GLOBAL_IP_HASH = ();
+	%$GLOBAL_IP_HITS = ();
+}
+
+sub sort_net_something {
+
+	my @a  = split /\./, $a;
+	my @b = split /\./, $b;
+	
+	$a[3] =~ s/\/.*$//;
+	$b[3] =~ s/\/.*$//;
+	
+	return
+		$a[0] <=> $b[0] ||
+		$a[1] <=> $b[1] ||
+		$a[2] <=> $b[2] ||
+		$a[3] <=> $b[3];
 }
