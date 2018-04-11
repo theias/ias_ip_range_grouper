@@ -39,15 +39,25 @@ takes precidence.
 =item * --cidr-exclude=192.168.0.0/24 [ --cidr-exclude=192.168.1.0/24 ... ] - causes
 all IP addresses inside of the specified range to not be included.
 
+=item * --smallest-net-size - integer representing the smallest /NET you want to see.  Defaults to 24.  This only affects tabbed (pretty) output.
+
+=item * --output-routine - Output in dumper (Data::Dumper), tabbed (pretty), or json.
+
+=item * --watch - Watch the tree grow.
+
+=item * --watch-every - change the update frequency for the watch functionality 
+
+=back
+
+=head2 DEBUGGING
+
+=over 4
+
 =item * --test - run it with the test IPs in the script;
 
 =item * --verbose - give some status info about processing (currently, not much)
 
 =item * --dump-binary - give the binary hash
-
-=item * --smallest-net-size - integer representing the smallest /NET you want to see.  Defaults to 24.  This only affects tabbed (pretty) output.
-
-=item * --output-routine - Output in dumper (Data::Dumper), tabbed (pretty), or json.
 
 =back
 
