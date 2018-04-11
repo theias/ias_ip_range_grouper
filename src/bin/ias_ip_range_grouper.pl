@@ -120,7 +120,7 @@ my @TEST_IPS = (
 	'192.168.1.253',
 );
 
-my $CONDENSED_HR = {};
+my $GLOBAL_IP_HASH = {};
 my $SINGLE_TEST_IP = '172.16.1.1';
 my $IP_BIT_LENGTH = 32;
 
@@ -244,8 +244,6 @@ sub do_main_processing
 	
 	my $condensed = condense_bit_hr($bin_ip_hr);
 
-	$CONDENSED_HR = $condensed;
-
 	if ($OPTIONS_VALUES->{'dump-binary'})
 	{
 		print Dumper($condensed),$/;
@@ -325,6 +323,8 @@ sub process_ipv4_address
 sub process_file
 {
 	my ($fh, $ip_hash) = @_;
+
+	$GLOBAL_IP_HASH = $ip_hash;
 
 	my $counter=0;
 	
@@ -625,13 +625,15 @@ sub cidr_match
 	return 1;
 }
 
+
 sub watch_thing
 {
 	print "\033[2J";    #clear the screen
 	print "\033[0;0H"; #jump to 0,0
-	print scalar localtime(), "pid: $$", $/;
+	print scalar localtime(), " pid: $$", $/;
+	my $condensed = condense_bit_hr($GLOBAL_IP_HASH);
 	$OUTPUT_ROUTINES{$OPTIONS_VALUES->{'output-routine'}}->(
-		convert_condensed_hr_to_decimal($CONDENSED_HR)
+		convert_condensed_hr_to_decimal($condensed)
 	);
 	$SIG{'ALRM'} = \&watch_thing;
 	alarm $OPTIONS_VALUES->{'watch-every'};
