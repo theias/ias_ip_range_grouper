@@ -83,18 +83,23 @@ my $OPTIONS = [
 	'smallest-net-size=i',
 	'cidr-include=s@',
 	'cidr-exclude=s@',
+	'cidr-grep'
 ];
 
 my %OUTPUT_ROUTINES = (
 	'dumper' => sub { print Data::Dumper($_[0]),$/},
 	'tabbed' => \&tab_hash_output,
 	'json' => \&json_hash_output,
+	'cidr-grep' => sub {},
 );
 
 GetOptions(
 	$OPTIONS_VALUES,
 	@$OPTIONS
 ) or pod2usage ( -message => "Bad options.", -exitval => 1);
+
+$OPTIONS_VALUES->{'output-routine'} = 'cidr-grep'
+	if ($OPTIONS_VALUES->{'cidr-grep'});
 
 $OPTIONS_VALUES->{'output-routine'} ||= 'tabbed';
 $OPTIONS_VALUES->{'smallest-net-size'} ||= 24;
@@ -291,8 +296,18 @@ sub process_ipv4_address
 		}
 	}
 	
-	add_ips_to_hash($ip_hash, [$ipv4])
-		if $wanted;			
+	if ($wanted)
+	{
+	
+		if ($OPTIONS_VALUES->{'cidr-grep'})
+		{
+			print $ipv4,$/;
+		}
+		else
+		{
+			add_ips_to_hash($ip_hash, [$ipv4])
+		}
+	}			
 	
 }
 
