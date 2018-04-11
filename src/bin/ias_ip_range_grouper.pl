@@ -262,6 +262,8 @@ sub process_file
 		IPV4: foreach my $ipv4 (@parts)
 		{
 			print "IPv4! $ipv4\n";
+			next if ($ipv4 !~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/);
+			
 			my $ipv4_bits = convert_ip_to_bits($ipv4);
 
 			if (
@@ -564,6 +566,10 @@ sub verbose
 sub cidr_match
 {
 	my ($cidr_bits_ar, $cidr_netmask_ar, $needle_ar) = @_;
+
+	print "Comparing: @$cidr_bits_ar",$/;
+	print "to:        @$needle_ar",$/;
+	print "Netmask:   @$cidr_netmask_ar",$/;
 
 	for my $index (0..scalar(@$cidr_bits_ar)-1)
 	{
