@@ -32,6 +32,13 @@ Given a list of IP addresses, it groups them together in subnets.
 
 =over 4
 
+=item * --cidr-include=192.168.0.0/24 [ --cidr-include=192.168.1.0/24 ... ] - causes
+all IP addresses outside of the specified ranges to not be included.  Exclusion
+takes precidence.
+
+=item * --cidr-exclude=192.168.0.0/24 [ --cidr-exclude=192.168.1.0/24 ... ] - causes
+all IP addresses inside of the specified range to not be included.
+
 =item * --test - run it with the test IPs in the script;
 
 =item * --verbose - give some status info about processing (currently, not much)
@@ -238,6 +245,57 @@ sub do_main_processing
 
 my %STRING_CIDR_CACHE;
 
+sub process_ipv4_address
+{
+	my ($ip_hash, $ipv4) = @_;
+	
+	my $ipv4_bits = convert_ip_to_bits($ipv4);
+
+	if (
+		$OPTIONS_VALUES->{'cidr-exclude'}
+		&&
+		scalar @{$OPTIONS_VALUES->{'cidr-exclude'}}
+	)
+	{
+		foreach my $cidr_exclude (@{$OPTIONS_VALUES->{'cidr-exclude'}})
+		{
+			# print "Examining: $cidr_exclude\n";
+			add_cidr_to_cidr_cache($cidr_exclude, \%STRING_CIDR_CACHE);
+
+			return if ( cidr_match (
+				$STRING_CIDR_CACHE{$cidr_exclude}{'ip_bits'},
+				$STRING_CIDR_CACHE{$cidr_exclude}{'netmask_bits'},
+				$ipv4_bits,
+			))
+		}
+	}
+
+	my $wanted = 1;
+
+	if (
+		$OPTIONS_VALUES->{'cidr-include'}
+		&& 
+		scalar @{$OPTIONS_VALUES->{'cidr-include'}}
+	)
+	{
+		$wanted = 0;
+		foreach my $cidr_include (@{$OPTIONS_VALUES->{'cidr-include'}})
+		{
+		add_cidr_to_cidr_cache($cidr_include, \%STRING_CIDR_CACHE);
+
+			$wanted++ if ( cidr_match (
+				$STRING_CIDR_CACHE{$cidr_include}{'ip_bits'},
+				$STRING_CIDR_CACHE{$cidr_include}{'netmask_bits'},
+				$ipv4_bits,
+			))
+		}
+	}
+	
+	add_ips_to_hash($ip_hash, [$ipv4])
+		if $wanted;			
+	
+}
+
 sub process_file
 {
 	my ($fh, $ip_hash) = @_;
@@ -261,53 +319,9 @@ sub process_file
 
 		IPV4: foreach my $ipv4 (@parts)
 		{
-			print "IPv4! $ipv4\n";
 			next if ($ipv4 !~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/);
+			process_ipv4_address($ip_hash, $ipv4);
 			
-			my $ipv4_bits = convert_ip_to_bits($ipv4);
-
-			if (
-				$OPTIONS_VALUES->{'cidr-exclude'}
-				&&
-				scalar @{$OPTIONS_VALUES->{'cidr-exclude'}}
-			)
-			{
-				foreach my $cidr_exclude (@{$OPTIONS_VALUES->{'cidr-exclude'}})
-				{
-					print "Examining: $cidr_exclude\n";
-					add_cidr_to_cidr_cache($cidr_exclude, \%STRING_CIDR_CACHE);
-
-					next IPV4 if ( cidr_match (
-						$STRING_CIDR_CACHE{$cidr_exclude}{'ip_bits'},
-						$STRING_CIDR_CACHE{$cidr_exclude}{'netmask_bits'},
-						$ipv4_bits,
-					))
-				}
-			}
-
-			my $wanted = 1;
-
-			if (
-				$OPTIONS_VALUES->{'cidr-include'}
-				&& 
-				scalar @{$OPTIONS_VALUES->{'cidr-include'}}
-			)
-			{
-				$wanted = 0;
-				foreach my $cidr_include (@{$OPTIONS_VALUES->{'cidr-include'}})
-				{
-				add_cidr_to_cidr_cache($cidr_include, \%STRING_CIDR_CACHE);
-
-					$wanted++ if ( cidr_match (
-						$STRING_CIDR_CACHE{$cidr_include}{'ip_bits'},
-						$STRING_CIDR_CACHE{$cidr_include}{'netmask_bits'},
-						$ipv4_bits,
-					))
-				}
-			}
-			
-			add_ips_to_hash($ip_hash, \@parts)
-				if $wanted;			
 		}
 
 	}
@@ -338,7 +352,10 @@ sub test_bit_back_to_dec
 
 sub test_convert_back_to_human
 {
-	add_ips_to_hash(\%IP_HASH, \@TEST_IPS);
+	foreach my $ipv4 (@TEST_IPS)
+	{
+		process_ipv4_address(\%IP_HASH, $ipv4);
+	}
 	my $condensed = condense_bit_hr(\%IP_HASH);
 	
 	print Dumper(convert_condensed_hr_to_decimal($condensed));
@@ -348,7 +365,10 @@ sub test_convert_back_to_human
 sub test_condense
 {
 
-	add_ips_to_hash(\%IP_HASH, \@TEST_IPS);
+	foreach my $ipv4 (@TEST_IPS)
+	{
+		process_ipv4_address(\%IP_HASH, $ipv4);
+	}
 
 	print Dumper(condense_bit_hr(
 		\%IP_HASH
@@ -567,14 +587,14 @@ sub cidr_match
 {
 	my ($cidr_bits_ar, $cidr_netmask_ar, $needle_ar) = @_;
 
-	print "Comparing: @$cidr_bits_ar",$/;
-	print "to:        @$needle_ar",$/;
-	print "Netmask:   @$cidr_netmask_ar",$/;
+	# print "Comparing: @$cidr_bits_ar",$/;
+	# print "to:        @$needle_ar",$/;
+	# print "Netmask:   @$cidr_netmask_ar",$/;
 
 	for my $index (0..scalar(@$cidr_bits_ar)-1)
 	{
 		return 1 if ($cidr_netmask_ar->[$index] == 0 );
-		return 0 if ($cidr_bits_ar->[$index] != $needle_ar);
+		return 0 if ($cidr_bits_ar->[$index] != $needle_ar->[$index]);
 	}
 	return 1;
 }
