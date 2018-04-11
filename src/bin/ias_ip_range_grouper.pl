@@ -83,7 +83,8 @@ my $OPTIONS = [
 	'smallest-net-size=i',
 	'cidr-include=s@',
 	'cidr-exclude=s@',
-	'cidr-grep'
+	'cidr-grep',
+	'watch',
 ];
 
 my %OUTPUT_ROUTINES = (
@@ -103,6 +104,7 @@ $OPTIONS_VALUES->{'output-routine'} = 'cidr-grep'
 
 $OPTIONS_VALUES->{'output-routine'} ||= 'tabbed';
 $OPTIONS_VALUES->{'smallest-net-size'} ||= 24;
+$OPTIONS_VALUES->{'watch-every'} ||= 1;
 if (! $OUTPUT_ROUTINES{$OPTIONS_VALUES->{'output-routine'}})
 {
 	print STDERR "Bad output routine: ", $OPTIONS_VALUES->{'output-routine'},$/;
@@ -110,6 +112,38 @@ if (! $OUTPUT_ROUTINES{$OPTIONS_VALUES->{'output-routine'}})
 	exit 1;
 }
 
+my @TEST_IPS = (
+	'172.16.1.1',
+	'172.16.1.2',
+	'172.16.2.1',
+	'192.168.1.252',
+	'192.168.1.253',
+);
+
+my $CONDENSED_HR = {};
+my $SINGLE_TEST_IP = '172.16.1.1';
+my $IP_BIT_LENGTH = 32;
+
+my %IP_HASH;
+
+
+if ($OPTIONS_VALUES->{'test'})
+{
+	test_convert_back_to_human();
+	exit;
+}
+
+
+if ($OPTIONS_VALUES->{'watch'})
+{
+	$SIG{'ALRM'} = \&watch_thing;
+	alarm $OPTIONS_VALUES->{'watch-every'};
+}
+
+
+do_main_processing();
+
+exit;
 
 
 sub json_hash_output
@@ -183,31 +217,6 @@ sub get_output_routines
 	return $output;
 }
 
-my @TEST_IPS = (
-	'172.16.1.1',
-	'172.16.1.2',
-	'172.16.2.1',
-	'192.168.1.252',
-	'192.168.1.253',
-);
-
-my $SINGLE_TEST_IP = '172.16.1.1';
-my $IP_BIT_LENGTH = 32;
-
-my %IP_HASH;
-
-# convert_ip_to_bits($SINGLE_TEST_IP);
-# test_bit_back_to_dec();
-
-if ($OPTIONS_VALUES->{'test'})
-{
-	test_convert_back_to_human();
-	exit;
-}
-
-do_main_processing();
-
-exit;
 
 sub do_main_processing
 {
@@ -234,6 +243,8 @@ sub do_main_processing
 	
 	
 	my $condensed = condense_bit_hr($bin_ip_hr);
+
+	$CONDENSED_HR = $condensed;
 
 	if ($OPTIONS_VALUES->{'dump-binary'})
 	{
@@ -612,4 +623,16 @@ sub cidr_match
 		return 0 if ($cidr_bits_ar->[$index] != $needle_ar->[$index]);
 	}
 	return 1;
+}
+
+sub watch_thing
+{
+	print "\033[2J";    #clear the screen
+	print "\033[0;0H"; #jump to 0,0
+	print scalar localtime(), "pid: $$", $/;
+	$OUTPUT_ROUTINES{$OPTIONS_VALUES->{'output-routine'}}->(
+		convert_condensed_hr_to_decimal($CONDENSED_HR)
+	);
+	$SIG{'ALRM'} = \&watch_thing;
+	alarm $OPTIONS_VALUES->{'watch-every'};
 }
