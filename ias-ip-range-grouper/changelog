@@ -1,3 +1,9 @@
+ias-ip-range-grouper 1.1.2-0 noarch; urgency=low
+
+	* Minor bug fixes, better docs
+
+  -- Martin VanWinkle (mvanwinkle@ias.edu)  Thu, 12 Apr 2018 14:30:03 -0400
+
 ias-ip-range-grouper 1.1.0-0 noarch; urgency=low
 
 	* Ability to watch and clear

@@ -98,6 +98,28 @@ The algorithm is silly:
 I'm positive somebody out there will be upset that I convert String IPs to decimals then to
 an array of 1's and 0's in char form, but hey!  It works.
 
+=head1 LICENSE
+
+copyright (C) 2017 Martin VanWinkle, Institute for Advanced Study
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+See 
+
+* http://www.gnu.org/licenses/
+
+==head1 AUTHOR
+
+Martin VanWinkle
+
 =cut
 
 my $OPTIONS_VALUES = {};
