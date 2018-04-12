@@ -18,11 +18,17 @@ ias_log_ip_range_grouper.pl
 
 =head1 SYNOPSIS
 
-  	cat list_of_ips.txt | ./ias_log_ip_range_grouper.pl
-
-Or
-
-    ./ias_log_ip_range_grouper.pl file1 [file2 ...]
+  # Pipe a list of IPs
+  cat list_of_ips.txt | ./ias_log_ip_range_grouper.pl
+  
+  # Group IPs in files
+  ./ias_log_ip_range_grouper.pl file1 [file2 ...]
+  
+  # Group src ips from a firewall drop log 
+  tail -f firewall_log | grep -i DROP | awk '{print $2}' \
+     | ./ias_log_range_grouper.pl --watch
+  # (and to reset the counters:
+  kill -USR1 (pid)
 
 =head1 DESCRIPTION
 
