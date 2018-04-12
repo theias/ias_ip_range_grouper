@@ -110,7 +110,7 @@ my $OPTIONS = [
 ];
 
 my %OUTPUT_ROUTINES = (
-	'dumper' => sub { print Data::Dumper($_[0]),$/},
+	'dumper' => sub { print Dumper($_[0]),$/},
 	'tabbed' => \&tab_hash_output,
 	'json' => \&json_hash_output,
 	'cidr-grep' => sub {},
@@ -633,7 +633,7 @@ sub dec_to_bit_array
 	
 	my $string = sprintf("%b", $_[0]);
 	my $pad = '0' x ($IP_BIT_LENGTH - length($string));
-	return [ split (//,$pad.$string)];
+	return [ map { $_ + 0 } split (//,$pad.$string)];
 }
 
 sub dec2ip {
