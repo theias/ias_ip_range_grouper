@@ -121,18 +121,22 @@ GetOptions(
 	@$OPTIONS
 ) or pod2usage ( -message => "Bad options.", -exitval => 1);
 
-$OPTIONS_VALUES->{'output-routine'} = 'cidr-grep'
-	if ($OPTIONS_VALUES->{'cidr-grep'});
-
 $OPTIONS_VALUES->{'output-routine'} ||= 'tabbed';
 $OPTIONS_VALUES->{'smallest-net-size'} ||= 24;
 $OPTIONS_VALUES->{'watch-every'} ||= 1;
+
 if (! $OUTPUT_ROUTINES{$OPTIONS_VALUES->{'output-routine'}})
 {
 	print STDERR "Bad output routine: ", $OPTIONS_VALUES->{'output-routine'},$/;
 	print STDERR get_output_routines();
 	exit 1;
 }
+
+
+$OUTPUT_ROUTINES{'cidr-grep'} = sub {};
+
+$OPTIONS_VALUES->{'output-routine'} = 'cidr-grep'
+	if ($OPTIONS_VALUES->{'cidr-grep'});
 
 my @TEST_IPS = (
 	'172.16.1.1',
