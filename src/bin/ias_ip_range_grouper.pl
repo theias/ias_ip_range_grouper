@@ -156,6 +156,7 @@ if ($OPTIONS_VALUES->{'test'})
 	exit;
 }
 
+init_global_ip_hash();
 
 if ($OPTIONS_VALUES->{'watch'})
 {
@@ -701,10 +702,10 @@ sub watch_output
 sub sig_usr1
 {
 	$SIG{'USR1'} = \&sig_usr1;
-	clear_global_ip_counters();
+	init_global_ip_hash();
 }
 
-sub clear_global_ip_counters
+sub init_global_ip_hash
 {
 	%$GLOBAL_IP_HASH = ();
 	%$GLOBAL_IP_HITS = ();
