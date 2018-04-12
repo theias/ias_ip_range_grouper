@@ -1,10 +1,15 @@
 # ias-ip-range-grouper
 
-Here is an introduction to this project.
+When you have a list of IP addresses and you want to find some way to fit them
+into arbitrarily sized networks.
+
+You should definitly consider experimenting with --smallest-net-size , as sometimes
+some data sets might not work well with the pretty output.
+
 
 # License
 
-copyright (C) 2017 Author, Institution
+copyright (C) 2017 Martin VanWinkle, Institute for Advanced Study
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -22,7 +27,8 @@ See
 
 ## Description
 
-* some_script.sh - does something.
+* **ias\_ip\_range\_grouper.pl** - groups IP addresses into network ranges and outputs
+a tree.  **perldoc** this for more information.
 
 # Supplemental Documentation
 
@@ -33,7 +39,7 @@ Supplemental documentation for this project can be found here:
 # Installation
 
 Ideally stuff should run if you clone the git repo, and install the deps specified
-in either "deb_control" or "rpm_specific"
+in either "deb_control" or "rpm_specific".
 
 Optionally, you can build a package which will install the binaries in
 
