@@ -713,15 +713,15 @@ sub clear_global_ip_counters
 
 sub sort_net_something {
 
-	my @a  = split /\./, $a;
-	my @b = split /\./, $b;
-	
-	$a[3] =~ s/\/.*$//;
-	$b[3] =~ s/\/.*$//;
-	
-	return
-		$a[0] <=> $b[0] ||
-		$a[1] <=> $b[1] ||
-		$a[2] <=> $b[2] ||
-		$a[3] <=> $b[3];
+	my @a = split /\D+/, $a;
+	my @b = split /\D+/, $b;
+
+	my $result;
+
+	for my $index (0..scalar(@a)-1)
+	{
+		$result = $a[$index] <=> $b[$index];
+		return $result if $result;
+	}
+	return $result;		
 }
