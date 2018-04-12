@@ -159,9 +159,8 @@ if ($OPTIONS_VALUES->{'test'})
 
 if ($OPTIONS_VALUES->{'watch'})
 {
-	$SIG{'ALRM'} = \&watch_thing;
 	$SIG{'USR1'} = \&sig_usr1;
-	alarm $OPTIONS_VALUES->{'watch-every'};
+	watch_thing();
 }
 
 
