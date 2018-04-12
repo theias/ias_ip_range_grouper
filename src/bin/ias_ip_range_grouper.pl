@@ -39,13 +39,17 @@ takes precidence.
 =item * --cidr-exclude=192.168.0.0/24 [ --cidr-exclude=192.168.1.0/24 ... ] - causes
 all IP addresses inside of the specified range to not be included.
 
-=item * --smallest-net-size - integer representing the smallest /NET you want to see.  Defaults to 24.  This only affects tabbed (pretty) output.
+=item * --smallest-net-size (integer) - integer representing the smallest /NET you want to see.  Defaults to 24.  This only affects tabbed (pretty) output.
 
-=item * --output-routine - Output in dumper (Data::Dumper), tabbed (pretty), or json.
+=item * --output-routine (string) - Output in dumper (Data::Dumper), tabbed (pretty), or json.
 
-=item * --watch - Watch mode.  Watch the tree grow.
+=item * --watch (flag) - Enable watch mode.  Watch the tree grow.
 
-=item * --watch-every - change the update frequency for the watch functionality 
+=item * --watch-every (integer) - Change the update frequency for the watch functionality 
+
+=item * --watch-title (string) - Display this string when in watch mode
+
+=item * --hit-count (flag) - Display number of times IP address has shown up.
 
 =back
 
@@ -102,6 +106,7 @@ my $OPTIONS = [
 	'cidr-grep',
 	'watch',
 	'hit-count',
+	'watch-title=s',
 ];
 
 my %OUTPUT_ROUTINES = (
@@ -674,7 +679,19 @@ sub watch_output
 {
 	print "\033[2J";    #clear the screen
 	print "\033[0;0H"; #jump to 0,0
-	print scalar localtime(), " pid: $$", $/;
+
+	my $watch_title = $OPTIONS_VALUES->{'watch-title'} || '';
+
+	my @elements = (
+		scalar localtime(),
+	);
+	push @elements, $OPTIONS_VALUES->{'watch-title'}
+		if $OPTIONS_VALUES->{'watch-title'};
+	
+	push @elements, "pid: $$";
+	
+	print join(' -- ' , @elements), $/;
+
 	my $condensed = condense_bit_hr($GLOBAL_IP_HASH);
 	$OUTPUT_ROUTINES{$OPTIONS_VALUES->{'output-routine'}}->(
 		convert_condensed_hr_to_decimal($condensed)
