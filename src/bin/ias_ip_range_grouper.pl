@@ -26,7 +26,7 @@ ias_log_ip_range_grouper.pl
   
   # Group src ips from a firewall drop log 
   tail -f firewall_log | grep -i DROP | awk '{print $2}' \
-     | ./ias_log_range_grouper.pl --watch
+     | ./ias_log_range_grouper.pl --watch --hit-count
   # (and to reset the counters:
   kill -USR1 (pid)
 
