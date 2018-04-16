@@ -1,3 +1,10 @@
+ias-ip-range-grouper 1.1.1-1 noarch; urgency=low
+
+	* Added dependencies for deb and rpm
+	  (perl-Module-Runtime , libmodule-runtime-perl )
+
+  -- Martin VanWinkle (mvanwinkle@ias.edu) Mon, 16 Apr 2018 13:07:45 -0400
+
 ias-ip-range-grouper 1.1.1-0 noarch; urgency=low
 
 	* Minor bug fixes, better docs

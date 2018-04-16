@@ -1,4 +1,4 @@
-#Requires: 
+Requires: perl-Module-Runtime
 AutoReqProv: no 
 Summary: Groups IPs together in subnets.
 Group: Generic Group
