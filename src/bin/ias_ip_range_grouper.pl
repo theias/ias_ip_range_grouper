@@ -116,7 +116,7 @@ See
 
 * http://www.gnu.org/licenses/
 
-==head1 AUTHOR
+=head1 AUTHOR
 
 Martin VanWinkle
 
