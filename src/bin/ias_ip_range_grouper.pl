@@ -181,9 +181,12 @@ my $SINGLE_TEST_IP = '172.16.1.1';
 my $IP_BIT_LENGTH = 32;
 
 our $sym_pipe='│';
+# our $sym_pipe='|';
 our $sym_t_pipe='├';
+# our $sym_t_pipe='+';
 our $sym_h_line='─';
 our $sym_elbow='└';
+# our $sym_elbow='+';
 my $descent = 1;
 
 my %IP_HASH;
@@ -273,11 +276,11 @@ sub tree_hash_output
 			if ($count == $amount
 			)
 			{
-				push @depth_stack, '    ';
+				push @depth_stack, ' A  ';
 			}
 			else
 			{
-				push @depth_stack, "$sym_pipe    ";
+				push @depth_stack, "$sym_pipe B  ";
 			}
 		}
 		my $net_size;
@@ -322,7 +325,9 @@ sub tree_hash_output
 
 		else
 		{
-			pop (@depth_stack);
+		
+			pop (@depth_stack)
+				if $pushed_depth;
 			$pushed_depth = 0;
 			$descent = 0;
 			tree_hash_output($hr->{$key}, $depth, $net_size);
