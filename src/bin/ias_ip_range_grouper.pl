@@ -141,6 +141,7 @@ my %OUTPUT_ROUTINES = (
 	'dumper' => sub { print Dumper($_[0]),$/},
 	'tabbed' => \&tab_hash_output,
 	'json' => \&json_hash_output,
+	'tree' => \&tree_hash_output,
 	'cidr-grep' => sub {},
 );
 
@@ -179,6 +180,12 @@ my $GLOBAL_IP_HITS = {};
 my $SINGLE_TEST_IP = '172.16.1.1';
 my $IP_BIT_LENGTH = 32;
 
+our $sym_pipe='│';
+our $sym_t_pipe='├';
+our $sym_h_line='─';
+our $sym_elbow='└';
+my $descent = 1;
+
 my %IP_HASH;
 
 
@@ -213,9 +220,126 @@ sub json_hash_output
 	
 }
 
+{
+	
+	my @depth_stack = ();
+
+	
+sub tree_hash_output
+{
+
+	my ($hr, $depth, $parent_net_size) = @_;
+	$depth ||= 0;
+	$parent_net_size ||= 32;
+	
+	my $largest_net_size = 32;
+	foreach my $key (keys %$hr)
+	{
+		my $net_size;
+		my $net;
+		$key =~ m/(.+)\/(.+)/;
+		$net=$1;
+		$net_size = $2;
+		
+		$largest_net_size = $net_size
+			if ($net_size <= $largest_net_size);
+	}
+
+	my $amount = scalar keys %$hr;
+	my $count = 0;
+	
+
+	my $current_depth_stack_string = join('', @depth_stack);
+	foreach my $key (sort sort_net_something keys %$hr)
+	{
+		$count++;
+		
+		my $node_left = $sym_t_pipe;
+		
+		my $pushed_depth = 0;
+		
+		if (# @depth_stack != $depth
+			# || ! $descent
+			! $descent
+		)
+		{
+			# print "Scalar depth stack: ", scalar(@depth_stack),$/;
+			# print "Depth: ", $depth,$/;
+		}
+		else			
+		{
+			$pushed_depth = 1;
+		
+			if ($count == $amount
+			)
+			{
+				push @depth_stack, '    ';
+			}
+			else
+			{
+				push @depth_stack, "$sym_pipe    ";
+			}
+		}
+		my $net_size;
+		my $net;
+		$key =~ m/(.+)\/(.+)/;
+		$net=$1;
+		$net_size = $2;
+		
+		my $node_left;
+		if ($count == $amount)
+		{
+			$node_left = $sym_elbow;
+		}
+		else
+		{
+			$node_left = $sym_t_pipe;
+		}
+
+		if ($net_size == 32)
+		{
+		
+			print $current_depth_stack_string;
+			print "$node_left── ",$key;
+			if ($OPTIONS_VALUES->{'hit-count'})
+			{
+				print " ", $GLOBAL_IP_HITS->{$net};
+			}
+			
+			print $/;
+		}
+		
+		elsif ($largest_net_size <= $OPTIONS_VALUES->{'smallest-net-size'}
+			|| (
+				$parent_net_size < $OPTIONS_VALUES->{'smallest-net-size'}
+			)
+		)
+		{
+			print $current_depth_stack_string;
+			print "$node_left── ", $key,$/;
+			tree_hash_output($hr->{$key}, $depth+$descent, $net_size);
+		}
+
+		else
+		{
+			pop (@depth_stack);
+			$pushed_depth = 0;
+			$descent = 0;
+			tree_hash_output($hr->{$key}, $depth, $net_size);
+			$descent = 1;
+		}
+		
+		pop @depth_stack
+			if ($pushed_depth);
+	}	
+}
+
+}
 sub tab_hash_output
 {
 	my ($hr, $depth, $parent_net_size) = @_;
+
+
 	$depth ||= 0;
 	$parent_net_size ||= 32;
 	
