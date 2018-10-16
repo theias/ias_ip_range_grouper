@@ -196,15 +196,15 @@ our $ALL_TREE_SYMBOLS = {
 		'elbow'  => '└',
 	},
 	'o' => {
-		'pipe'   => 'O',
-		't_pipe' => 'O',
+		'pipe'   => 'o',
+		't_pipe' => 'o',
 		'h_line' => 'o',
 		'elbow'  => 'o',
 	},
 	'+' => {
 		'pipe'   => '+',
 		't_pipe' => '+',
-		'h_line' => '+',
+		'h_line' => '-',
 		'elbow'  => '+',
 	},
 
@@ -325,7 +325,7 @@ sub tree_hash_output
 		{
 		
 			print $current_depth_stack_string;
-			print $node_left,$TREE_SYMBOLS->{'h_line'} x 2, $key;
+			print $node_left,$TREE_SYMBOLS->{'h_line'} x 2,' ', $key;
 			if ($OPTIONS_VALUES->{'hit-count'})
 			{
 				print " ", $GLOBAL_IP_HITS->{$net};
@@ -341,7 +341,7 @@ sub tree_hash_output
 		)
 		{
 			print $current_depth_stack_string;
-			print $node_left,$TREE_SYMBOLS->{'h_line'} x 2, $key,$/;
+			print $node_left,$TREE_SYMBOLS->{'h_line'} x 2, ' ', $key,$/;
 			tree_hash_output($hr->{$key}, $depth+$descent, $net_size);
 		}
 
