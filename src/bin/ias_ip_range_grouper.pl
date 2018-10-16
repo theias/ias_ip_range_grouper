@@ -174,7 +174,7 @@ $OPTIONS_VALUES->{'tree-chars'} ||= 'tree';
 
 if (! $OUTPUT_ROUTINES{$OPTIONS_VALUES->{'output-routine'}})
 {
-	print STDERR "Bad output routine: ", $OPTIONS_VALUES->{'output-routine'},$/;
+	print STDERR "Error: Bad output routine: ", $OPTIONS_VALUES->{'output-routine'},$/;
 	print STDERR get_output_routines();
 	exit 1;
 }
@@ -200,7 +200,7 @@ if ($GLOBAL_V4_BITMASK > 32
 	|| $GLOBAL_V4_BITMASK < 1
 )
 {
-	print STDERR "bitmask must be between 1 and 32\n";
+	print STDERR "Error: bitmask must be between 1 and 32\n";
 	exit 1;
 }
 
@@ -239,7 +239,7 @@ our $ALL_TREE_SYMBOLS = {
 
 if (! $ALL_TREE_SYMBOLS->{$OPTIONS_VALUES->{'tree-chars'}})
 {
-	print STDERR "Bad --tree-chars : ", $OPTIONS_VALUES->{'tree-chars'},$/;
+	print STDERR "Error: Bad --tree-chars : ", $OPTIONS_VALUES->{'tree-chars'},$/;
 	print STDERR get_tree_chars();
 	exit 1;
 }
