@@ -47,7 +47,19 @@ all IP addresses inside of the specified range to not be included.
 
 =item * --smallest-net-size (integer) - integer representing the smallest /NET you want to see.  Defaults to 24.  This only affects tabbed (pretty) output.
 
-=item * --output-routine (string) - Output in dumper (Data::Dumper), tabbed (pretty), or json.
+=item * --output-routine (string) - Output in
+
+=over 4
+
+=item dumper (Data::Dumper),
+
+=item tabbed (pretty)
+
+=item json
+
+=item tree
+
+=back
 
 =item * --watch (flag) - Enable watch mode.  Watch the tree grow.
 
@@ -56,6 +68,9 @@ all IP addresses inside of the specified range to not be included.
 =item * --watch-title (string) - Display this string when in watch mode
 
 =item * --hit-count (flag) - Display number of times IP address has shown up.
+
+=item * --bitmask (integer cidr) -  mask all IPs with the cidr number.  Example /24
+would cause all IP addresses A.B.C.D to be loaded as A.B.C.0
 
 =back
 
@@ -180,6 +195,15 @@ my @TEST_IPS = (
 
 my $GLOBAL_V4_BITMASK = $OPTIONS_VALUES->{bitmask}
 	|| 32;
+
+if ($GLOBAL_V4_BITMASK > 32
+	|| $GLOBAL_V4_BITMASK < 1
+)
+{
+	print STDERR "bitmask must be between 1 and 32\n";
+	exit 1;
+}
+
 my $GLOBAL_IP_HASH = {};
 my $GLOBAL_IP_HITS = {};
 my $SINGLE_TEST_IP = '172.16.1.1';
