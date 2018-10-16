@@ -324,7 +324,7 @@ sub tree_hash_output
 			$node_left = $TREE_SYMBOLS->{'t_pipe'};
 		}
 
-		if ($net_size == 32)
+		if ($net_size == $GLOBAL_V4_BITMASK)
 		{
 		
 			print $current_depth_stack_string;
@@ -332,6 +332,11 @@ sub tree_hash_output
 			if ($OPTIONS_VALUES->{'hit-count'})
 			{
 				print " ", $GLOBAL_IP_HITS->{$net};
+#				print "Net: $net",$/;
+#				print Dumper($GLOBAL_IP_HITS);
+#				exit;
+
+
 			}
 			
 			print $/;
@@ -396,7 +401,7 @@ sub tab_hash_output
 
 		my $padding = "\t" x $depth;
 		
-		if ($net_size == 32)
+		if ($net_size == $GLOBAL_V4_BITMASK)
 		{
 			print $padding,$key;
 			if ($OPTIONS_VALUES->{'hit-count'})
@@ -678,7 +683,13 @@ sub convert_condensed_hr_to_decimal_recursive
 		# print "Pad zeros: $pad_zeros\n";
 		my $padded = $full_bit_path . $pad_zeros;
 		# print "Padded:\t\t$padded\n";
-		my $new_key_name = dec2ip(bin_to_dec_oct($padded)) . '/' . length($full_bit_path);
+		
+		my $display_cidr = length($full_bit_path);
+		if ($GLOBAL_V4_BITMASK < $display_cidr)
+		{
+			$display_cidr = $GLOBAL_V4_BITMASK;
+		}
+		my $new_key_name = dec2ip(bin_to_dec_oct($padded)) . '/' . $display_cidr;
 		
 		# print "New key: $new_key_name\n";
 		
