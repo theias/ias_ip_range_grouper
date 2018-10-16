@@ -135,6 +135,7 @@ my $OPTIONS = [
 	'watch',
 	'hit-count',
 	'watch-title=s',
+	'tree-chars=s',
 ];
 
 my %OUTPUT_ROUTINES = (
@@ -153,6 +154,7 @@ GetOptions(
 $OPTIONS_VALUES->{'output-routine'} ||= 'tabbed';
 $OPTIONS_VALUES->{'smallest-net-size'} ||= 24;
 $OPTIONS_VALUES->{'watch-every'} ||= 1;
+$OPTIONS_VALUES->{'tree-chars'} ||= 'tree';
 
 if (! $OUTPUT_ROUTINES{$OPTIONS_VALUES->{'output-routine'}})
 {
@@ -179,6 +181,28 @@ my $GLOBAL_IP_HASH = {};
 my $GLOBAL_IP_HITS = {};
 my $SINGLE_TEST_IP = '172.16.1.1';
 my $IP_BIT_LENGTH = 32;
+
+our $TREE_SYMBOLS = {
+	ASCII => {
+		'pipe'   =>'|',
+		't_pipe' => '+',
+		'elbow'  => '+',
+		'h_line' => '-',
+	},
+	tree => {
+		'pipe'   => '│',
+		't_pipe' => '├',
+		'h_line' => '─',
+		'elbow'  => '└',
+	},
+	o => {
+		'pipe'   => 'O',
+		't_pipe' => 'O',
+		'h_line' => 'o',
+		'elbow'  => 'o',
+	},
+
+};
 
 our $sym_pipe='│';
 # our $sym_pipe='|';
@@ -257,17 +281,11 @@ sub tree_hash_output
 	{
 		$count++;
 		
-		my $node_left = $sym_t_pipe;
-		
 		my $pushed_depth = 0;
 		
-		if (# @depth_stack != $depth
-			# || ! $descent
-			! $descent
-		)
+		if (! $descent)
 		{
-			# print "Scalar depth stack: ", scalar(@depth_stack),$/;
-			# print "Depth: ", $depth,$/;
+
 		}
 		else			
 		{
@@ -276,11 +294,11 @@ sub tree_hash_output
 			if ($count == $amount
 			)
 			{
-				push @depth_stack, ' A  ';
+				push @depth_stack, '    ';
 			}
 			else
 			{
-				push @depth_stack, "$sym_pipe B  ";
+				push @depth_stack, "$sym_pipe    ";
 			}
 		}
 		my $net_size;
@@ -289,7 +307,7 @@ sub tree_hash_output
 		$net=$1;
 		$net_size = $2;
 		
-		my $node_left;
+		my $node_left = $sym_t_pipe;
 		if ($count == $amount)
 		{
 			$node_left = $sym_elbow;
