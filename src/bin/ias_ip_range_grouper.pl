@@ -182,35 +182,39 @@ my $GLOBAL_IP_HITS = {};
 my $SINGLE_TEST_IP = '172.16.1.1';
 my $IP_BIT_LENGTH = 32;
 
-our $TREE_SYMBOLS = {
-	ASCII => {
+our $ALL_TREE_SYMBOLS = {
+	'ASCII' => {
 		'pipe'   =>'|',
 		't_pipe' => '+',
 		'elbow'  => '+',
 		'h_line' => '-',
 	},
-	tree => {
+	'tree' => {
 		'pipe'   => '│',
 		't_pipe' => '├',
 		'h_line' => '─',
 		'elbow'  => '└',
 	},
-	o => {
+	'o' => {
 		'pipe'   => 'O',
 		't_pipe' => 'O',
 		'h_line' => 'o',
 		'elbow'  => 'o',
 	},
+	'+' => {
+		'pipe'   => '+',
+		't_pipe' => '+',
+		'h_line' => '+',
+		'elbow'  => '+',
+	},
 
 };
 
-our $sym_pipe='│';
-# our $sym_pipe='|';
-our $sym_t_pipe='├';
-# our $sym_t_pipe='+';
-our $sym_h_line='─';
-our $sym_elbow='└';
-# our $sym_elbow='+';
+our $TREE_SYMBOLS = $ALL_TREE_SYMBOLS->{$OPTIONS_VALUES->{'tree-chars'}}
+	|| $ALL_TREE_SYMBOLS->{'ASCII'};
+
+# This is a good example of a bad work around for a kludge.
+# leave it.
 my $descent = 1;
 
 my %IP_HASH;
@@ -298,7 +302,7 @@ sub tree_hash_output
 			}
 			else
 			{
-				push @depth_stack, "$sym_pipe    ";
+				push @depth_stack, $TREE_SYMBOLS->{'pipe'}."    ";
 			}
 		}
 		my $net_size;
@@ -307,21 +311,21 @@ sub tree_hash_output
 		$net=$1;
 		$net_size = $2;
 		
-		my $node_left = $sym_t_pipe;
+		my $node_left = $TREE_SYMBOLS->{'t_pipe'};
 		if ($count == $amount)
 		{
-			$node_left = $sym_elbow;
+			$node_left = $TREE_SYMBOLS->{'elbow'};
 		}
 		else
 		{
-			$node_left = $sym_t_pipe;
+			$node_left = $TREE_SYMBOLS->{'t_pipe'};
 		}
 
 		if ($net_size == 32)
 		{
 		
 			print $current_depth_stack_string;
-			print "$node_left── ",$key;
+			print $node_left,$TREE_SYMBOLS->{'h_line'} x 2, $key;
 			if ($OPTIONS_VALUES->{'hit-count'})
 			{
 				print " ", $GLOBAL_IP_HITS->{$net};
@@ -337,7 +341,7 @@ sub tree_hash_output
 		)
 		{
 			print $current_depth_stack_string;
-			print "$node_left── ", $key,$/;
+			print $node_left,$TREE_SYMBOLS->{'h_line'} x 2, $key,$/;
 			tree_hash_output($hr->{$key}, $depth+$descent, $net_size);
 		}
 
