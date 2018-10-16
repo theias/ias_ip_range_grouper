@@ -213,6 +213,13 @@ our $ALL_TREE_SYMBOLS = {
 
 };
 
+if (! $ALL_TREE_SYMBOLS->{$OPTIONS_VALUES->{'tree-chars'}})
+{
+	print STDERR "Bad --tree-chars : ", $OPTIONS_VALUES->{'tree-chars'},$/;
+	print STDERR get_tree_chars();
+	exit 1;
+}
+
 our $TREE_SYMBOLS = $ALL_TREE_SYMBOLS->{$OPTIONS_VALUES->{'tree-chars'}}
 	|| $ALL_TREE_SYMBOLS->{'ASCII'};
 
@@ -434,10 +441,16 @@ sub get_output_routines
 {
 	my $output = '';
 	$output .= "Available output routines: ".$/;
-	$output .= "\t".join("\n\t", keys %OUTPUT_ROUTINES).$/;
+	$output .= "\t".join("\n\t", sort keys %OUTPUT_ROUTINES).$/;
 	return $output;
 }
-
+sub get_tree_chars
+{
+	my $output = '';
+	$output .= "Available tree-chars: ".$/;
+	$output .= "\t".join("\n\t", sort keys %$ALL_TREE_SYMBOLS).$/;
+	return $output;
+}
 
 sub do_main_processing
 {
