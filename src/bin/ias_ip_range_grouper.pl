@@ -136,6 +136,7 @@ my $OPTIONS = [
 	'hit-count',
 	'watch-title=s',
 	'tree-chars=s',
+	'bitmask=i',
 ];
 
 my %OUTPUT_ROUTINES = (
@@ -177,6 +178,8 @@ my @TEST_IPS = (
 	'192.168.1.253',
 );
 
+my $GLOBAL_V4_BITMASK = $OPTIONS_VALUES->{bitmask}
+	|| 32;
 my $GLOBAL_IP_HASH = {};
 my $GLOBAL_IP_HITS = {};
 my $SINGLE_TEST_IP = '172.16.1.1';
@@ -485,7 +488,20 @@ sub process_ipv4_address
 {
 	my ($ip_hash, $ipv4) = @_;
 	
+	# print "Old v4: ", $ipv4,$/;
+
 	my $ipv4_bits = convert_ip_to_bits($ipv4);
+
+	if ($GLOBAL_V4_BITMASK != 32)
+	{
+		cidr_mask($ipv4_bits, $GLOBAL_V4_BITMASK);
+
+		$ipv4 = dec2ip(bin_ar_to_dec_oct($ipv4_bits));
+	}
+
+	
+	# print "New v4: ", $ipv4,$/;
+	# exit; 
 
 	if (
 		$OPTIONS_VALUES->{'cidr-exclude'}
@@ -849,6 +865,22 @@ sub cidr_match
 	return 1;
 }
 
+sub cidr_mask
+{
+	my ($cidr_bits_ar, $cidr) = @_;
+
+	# print "Comparing: @$cidr_bits_ar",$/;
+	# print "to:        @$needle_ar",$/;
+	# print "Netmask:   @$cidr_netmask_ar",$/;
+	# $IP_BIT_LENGTH
+	# print "Before:", join('', @$cidr_bits_ar),$/;
+	for my $index (1..$IP_BIT_LENGTH-$cidr)
+	{
+		$cidr_bits_ar->[$index * -1] = 0;
+	}
+	# print "After:", join('', @$cidr_bits_ar),$/;
+
+}
 
 sub watch_thing
 {
