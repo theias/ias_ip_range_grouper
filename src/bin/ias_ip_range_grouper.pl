@@ -336,7 +336,7 @@ sub tree_hash_output
 			}
 			else
 			{
-				push @depth_stack, $TREE_SYMBOLS->{'pipe'}."    ";
+				push @depth_stack, $TREE_SYMBOLS->{'pipe'}."   ";
 			}
 		}
 		my $net_size;
