@@ -1,3 +1,9 @@
+ias-ip-range-grouper 1.2.0-0 noarch; urgency=low
+
+	* Added different output options
+
+  -- Martin VanWinkle (mvanwinkle@ias.edu) Thu, 03 Jan 2019 12:55:35 -0500
+
 ias-ip-range-grouper 1.1.1-1 noarch; urgency=low
 
 	* Added dependencies for deb and rpm
