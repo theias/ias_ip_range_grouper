@@ -1,0 +1,29 @@
+# Set to 1 to enable useful permission settings
+USE_AUTOMATION_PERMISSIONS = 0
+AUTOMATION_USER = iasnetauto
+AUTOMATION_GROUP = iasnetauto
+
+# Symbolically link things in src/bin to /usr/bin
+# 
+symbolic_links-usr_bin = \
+	ias_ip_range_grouper.pl 
+# 	another_program.sh
+
+# Copy of the source tree distributed with the package,
+# PACKAGE_SELF_REPLICATING=1
+
+#######################
+# Advanced usage below
+#######################
+
+# Use the "Full Project" layout.
+include $(PACKAGE_SHELL_INCLUDE_PATH)/project_directories-full_project.gmk
+
+.PHONY: artifact_install
+
+artifact_install: \
+	package_install-conditional_additions-ALL \
+	package_install-code_repository_info_md_file
+
+artifact_install-post:
+	echo "This is where the cleanup happens."

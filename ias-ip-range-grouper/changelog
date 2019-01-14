@@ -1,3 +1,9 @@
+ias-ip-range-grouper 1.2.0-1 noarch; urgency=low
+
+	* Newer installation format
+
+  -- Martin VanWinkle (mvanwinkle@ias.edu)  Mon, 14 Jan 2019 09:15:07 -0500
+
 ias-ip-range-grouper 1.2.0-0 noarch; urgency=low
 
 	* Added different output options
